@@ -6,7 +6,6 @@ Operate your tests in the command line by entering the following command in the 
 
 
 ```
-#!
 
 mvn clean test -Dpassword="yourpassword" -Denvironment="yourenvironment"
 ```
@@ -20,7 +19,6 @@ If you would rather avoid installing an update set, use the following script (wi
 
 
 ```
-#!javascript
 
 function getTableVariables(tableName){
 	var gr = new GlideRecord('sys_dictionary');
@@ -46,7 +44,6 @@ If you are creating a page object for page that extends something other than tas
 
 
 ```
-#!java
 
 @FindBy(id = "sys_uniqueValue")
 public WebElement sysId;
@@ -57,7 +54,6 @@ ServiceCatalog items are a bit different.  I have my Service Catalog Item classe
 
 
 ```
-#!javascript
 
 function getServiceCatalogVariables(){
 	var gr = new GlideRecord('item_option_new');
@@ -85,7 +81,6 @@ Now you can use Selenium to easily interact with elements.
 The following script will take any UI Policies and turn them into assertions.  It will even look through the conditional scripts (if any) to get the g_form statements and make them assertions.
 
 ```
-#!javascript
 
 function uiPoliciesForTable(tableName){
 	var policy = new GlideRecord('sys_ui_policy');
@@ -157,7 +152,6 @@ function uiPoliciesForTable(tableName){
 The following script will take Client Scripts and look for any g_form statements that alter fields
 
 ```
-#!javascript
 
 function createClientScriptAssertions(tableName){
 	var gr = new GlideRecord('sys_script_client');
