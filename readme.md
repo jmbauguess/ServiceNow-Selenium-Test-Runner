@@ -1,6 +1,6 @@
 # ServiceNow Selenium Test Runner #
 
-This is a maven project to run browser tests for ServiceNow.  It supports running tests in SauceLabs, or natively on your machine.  If you want to run browsers other than Firefox on your machine, you will need to download the appropriate drivers and either add them to the classpath or update the pom.xml file with the location.  You will also need the Java 8 sdk installed, because some of the helper methods use its Date API.
+This is a [maven](http://maven.apache.org/) project to run browser tests for [ServiceNow](http://www.service-now.com).  It supports running tests in [SauceLabs](http://www.saucelabs.com), or natively on your machine.  If you want to run browsers other than Firefox on your machine, you will need to download the appropriate drivers and either add them to the classpath or update the pom.xml file with the location.  You will also need the [Java 8 sdk](http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html) installed, because some of the helper methods use its Date API.
 
 Operate your tests in the command line by entering the following command in the base directory of your project:
 
@@ -11,7 +11,7 @@ mvn clean test -Dpassword="yourpassword" -Denvironment="yourenvironment"
 ```
 
 
-An example class and test are included.  The test uses the PageObject and PageFactory pattern.
+An example class and test are included.  The test uses the [PageObject](https://code.google.com/p/selenium/wiki/PageObjects) and [PageFactory](https://code.google.com/p/selenium/wiki/PageFactory) pattern.
 
 I've created an update set, which is also in this repo, that contains Script Includes, Scheduled Jobs and a table to generate the appropriate locators in Java, Javascript, C#, Ruby and Python.  Install the update set and run the job.  (By default it runs some time in the afternoon.)  To change what language you want the classes to be, change one of the system properties that came with the update set.  The same thing applies to whether you prefer camel case variables or ones with underscores.
 
