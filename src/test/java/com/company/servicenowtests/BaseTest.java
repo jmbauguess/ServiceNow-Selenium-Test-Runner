@@ -12,7 +12,9 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.FindBy;
+import org.openqa.selenium.support.ui.Duration;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.Sleeper;
 
 /**
  * Contains the basic functions needed for testing (saving, logging in, etc.)
@@ -60,6 +62,18 @@ public class BaseTest {
         this.driver = driver;
     }
 
+    /**
+     * Makes the page wait using the Sleeper class
+     * @param duration The number of seconds to wait
+     */
+    public void makeThePageWait(int duration) {
+        try {
+            Sleeper.SYSTEM_SLEEPER.sleep(new Duration(duration, TimeUnit.SECONDS));
+        } catch (InterruptedException ie) {
+            System.out.println(ie);
+        }
+    }
+    
     /**
      * @return returns the base URL of the ServiceNow instance
      */
