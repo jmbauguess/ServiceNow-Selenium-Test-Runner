@@ -49,7 +49,7 @@ function copyWorkflowConditionDefaults(workflow1, workflow2){
 }
 /**
  * Copies all activity variables from a workflow activity
- * NOTE: You will need to go back and change the FIELD value of the UI Policy Actions
+ * NOTE: You will need to go back and change the FIELD value of the UI Policy Actions, but at least you'll have a good starting point
  * @param {String} workflow1 - The Sys ID of the workflow activity to copy from
  * @param {String} workflow2 - The Sys ID of the workflow activity to copy to
  */
