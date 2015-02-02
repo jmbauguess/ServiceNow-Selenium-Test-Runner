@@ -1,5 +1,6 @@
 package com.company.servicenowtests;
 
+import java.util.List;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -81,6 +82,19 @@ public class Approval extends BaseTest {
         login(ADMIN);
         approveTask(sys_id, false);
         login(ITIL);
+    }
+    
+    /**
+     * Takes a list of users, then impersonates them to do approvals
+     * @param approvers A list of approvers
+     * @param sys_id The record to approve
+     */
+    public void approveTasksAsUsers(List<String> approvers, String sys_id){
+        for (String approver : approvers){
+            impersonateAUser(approver);
+            approveTask(sys_id, true);
+        }
+        impersonateAUser("Admin");
     }
     
 }
