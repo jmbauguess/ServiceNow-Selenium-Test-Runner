@@ -12,12 +12,10 @@ import java.util.LinkedList;
 import java.util.Properties;
 import java.util.concurrent.TimeUnit;
 import org.junit.After;
-import static org.junit.Assert.assertTrue;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
-import org.junit.Test;
 import org.junit.rules.TestName;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
@@ -98,10 +96,7 @@ public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
 
     @After
     public void tearDown() {
-        try {
-            driver.quit();
-        } catch (Exception e){        
-        }
+        driver.quit();
     }
 
     @Override

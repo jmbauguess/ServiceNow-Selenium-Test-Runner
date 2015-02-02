@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
@@ -45,6 +46,18 @@ public class BaseTest {
 
     @FindBy(id = "sysverb_update_and_stay")
     public WebElement updateAndStayButton;
+    
+    @FindBy (id = "impersonate_span")
+    public WebElement impersonateButton;
+    
+    @FindBy (id = "sys_display.QUERY:active=true^locked_out=false")
+    public WebElement impersonateDialog;
+    
+    @FindBy (id = "ok_button")
+    public WebElement impersonateOK;
+    
+    @FindBy(id = "dialog_imp_user")
+    public WebElement impersonateBox;
 
     private boolean acceptNextAlert = true;
 
@@ -72,6 +85,22 @@ public class BaseTest {
         } catch (InterruptedException ie) {
             System.out.println(ie);
         }
+    }
+    
+    /**
+     * Executes the proper javascript function to bring up the Impersonate User dialog and impersonate a user
+     * @param username The user to impersonate
+     */
+    public void impersonateAUser(String username){
+        this.login(1);
+        driver.get(this.getBASE_URL() + "navpage.do");
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).executeScript("impUser.impersonateUser();");
+        }        
+        this.makeThePageWait(10);
+        this.impersonateDialog.sendKeys(username);
+        this.makeThePageWait(10);
+        this.impersonateOK.click();        
     }
     
     /**
