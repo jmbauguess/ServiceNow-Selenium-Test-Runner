@@ -24,6 +24,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
 import org.openqa.selenium.remote.DesiredCapabilities;
 import org.openqa.selenium.remote.RemoteWebDriver;
+import org.openqa.selenium.remote.SessionId;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.WebDriverWait;
 
@@ -43,7 +44,7 @@ public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
     public String browser;
     public String os;
     public String version;
-    public String sessionId;
+    public SessionId sessionId;
     static public SauceOnDemandAuthentication authentication;
     public @Rule
     SauceOnDemandTestWatcher resultReportingTestWatcher = new SauceOnDemandTestWatcher(this, authentication);
@@ -101,6 +102,6 @@ public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
 
     @Override
     public String getSessionId() {
-        return sessionId;
+        return sessionId.toString();
     }
 }

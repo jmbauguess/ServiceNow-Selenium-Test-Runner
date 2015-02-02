@@ -37,6 +37,7 @@ public class TestIncidentNormalFlow extends BaseServiceNowTestSauce implements S
                         + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);      
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);        
+        sessionId=((RemoteWebDriver)driver).getSessionId();
         incident = PageFactory.initElements(driver, Incident.class);        
         incident.login(0);
     }
@@ -88,10 +89,5 @@ public class TestIncidentNormalFlow extends BaseServiceNowTestSauce implements S
     public void incidentResolveAssertions(){
         assertTrue("Close Code is mandatory", incident.isMandatory(incident.closeCodeSpan));
         assertTrue("Close Notes are mandatory", incident.isMandatory(incident.closeNotesSpan));
-    }
-
-    @Override
-    public String getSessionId() {    
-        return sessionId;
     }
 }
