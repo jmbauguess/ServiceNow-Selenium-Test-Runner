@@ -7,6 +7,7 @@ import java.util.concurrent.TimeUnit;
 import org.junit.After;
 import org.junit.Before;
 import org.openqa.selenium.Alert;
+import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
@@ -14,8 +15,10 @@ import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.Duration;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
 import org.openqa.selenium.support.ui.Sleeper;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 /**
  * Contains the basic functions needed for testing (saving, logging in, etc.)
@@ -335,4 +338,51 @@ public class BaseTest {
 
         }
     }
+    
+    /**
+     * Adds customization to the a list view
+     * Field will be added to the end of the row
+     * @param field Which field to add to the list view - use the Display value of the field
+     */
+    public void customizeListView(String field){
+        WebElement gear = getListViewType();
+        gear.click();
+        WebDriverWait wait = new WebDriverWait(driver, 30);
+        wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("list_mechanic_header"))));
+        WebElement slushLeft = driver.findElement(By.id("slush_left"));
+        useSelectElement(slushLeft, field);
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).executeScript("slush.moveLeftToRight();");
+        } 
+        impersonateOK.click();
+    }
+    
+    /**
+     * Clears out any list customizations
+     */
+    public void clearCustomizedList(){
+        WebElement gear = getListViewType();
+        gear.click();
+        WebDriverWait wait = new WebDriverWait(driver, 30);
+        wait.until(ExpectedConditions.visibilityOf(driver.findElement(By.id("list_mechanic_header"))));
+        driver.findElement(By.id("list_reset")).click();
+        impersonateOK.click();
+    }
+    
+    /**
+     * Checks the page to see if the list view has been customized
+     * @return the reference to the proper gear image or null if not found
+     */
+    public WebElement getListViewType(){
+        List<WebElement> images = driver.findElements(By.tagName("img"));
+        for (WebElement image : images){
+            if (image.getAttribute("src").contains("images/gear.gifx?v=2")){
+                return image;
+            } else if (image.getAttribute("src").contains("images/gear_customize.gifx")){
+                return image;
+            }
+        }
+        return null;
+    }
+    
 }
