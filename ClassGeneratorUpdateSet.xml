@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<unload unload_date="2015-02-19 15:44:04">
+<unload unload_date="2015-02-20 19:38:33">
 <sys_remote_update_set action="INSERT_OR_UPDATE">
 <collisions/>
 <commit_date/>
@@ -13,253 +13,15 @@
 <state>loaded</state>
 <summary/>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>9fb8efce4592310032f7c1e7386b6dd2</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>880861624516310032f7c1e7386b6d75</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <update_set display_value=""/>
 <update_source display_value=""/>
 <updated/>
 </sys_remote_update_set>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sys_script_include_1c3f3b016431790032f726a7a44befaf</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="INSERT_OR_UPDATE"><active>true</active><client_callable>false</client_callable><description/><name>ClassCreator</name><script><![CDATA[var ClassCreator = Class.create();
-ClassCreator.prototype = {
-	initialize: function() {
-		this.camelCase = true;
-	},
-	getTaskTables: function(language, camelCaseVariables){
-		this.camelCase = camelCaseVariables;
-		var gr = new GlideRecord('sys_db_object');
-		gr.addEncodedQuery('super_class.name=task^ORname=task');
-		gr.query();
-		while(gr.next()){
-			var classTable = new GlideRecord('class_generator');
-			classTable.addQuery('u_tablename', gr.name);
-			classTable.addQuery('u_language', language);
-			classTable.query();
-			if (classTable.next()){
-				classTable.u_class_body = (this.getTableVariables(gr.name, language));
-				classTable.update();
-			} else {
-				var newClassTable = new GlideRecord('class_generator');
-				newClassTable.initialize();
-				newClassTable.u_language = language;
-				newClassTable.u_tablename = gr.name;
-				newClassTable.u_class_body = (this.getTableVariables(gr.name, language));
-				newClassTable.insert();
-			}
-		}
-	},
-	getTableVariables: function (tableName, language){
-		var gr = new GlideRecord('sys_dictionary');
-		gr.addEncodedQuery('nameIN' + tableName + '^element!=sys_id');
-		gr.query();
-		var data;
-		if (language == "java"){
-			data = this.getJavaVariables(gr, tableName);
-		} else if (language == "javascript"){
-			data = this.getJavascriptVariables(gr, tableName);
-		} else if (language == "csharp"){
-			data = this.getCSharpVariables(gr, tableName);
-		} else if (language == "python"){
-			data = this.getPythonVariables(gr, tableName);
-		} else if (language == "ruby"){
-			data = this.getRubyVariables(gr, tableName);
-		}
-		return this.generateClass(data, tableName, language);
-	},
-	generateClass: function (data, tablename, language){
-		var classToMake = '';
-		tablename = this.capitalizeFirstLetter(tablename);
-		if (this.camelCase){
-			tablename = this.replaceUnderscoresWithCamelCase(tablename);
-		}
-		if (language == 'java'){
-			if (tablename == "Task"){
-				classToMake += 'public class ' + tablename + "{\n" + data + "\n}\n\n";
-			} else {
-				classToMake += 'public class ' + tablename + " extends Task {\n" + data + "\n}\n\n";
-			}
-		} else if (language == "javascript"){
-			classToMake += 'var ' + tablename + " = {\n" + data + "\n}\n";
-			if (tablename != "Task"){
-				classToMake += tablename + ".prototype = new Task()";
-			}
-		} else if (language == "csharp"){
-			if (tablename == "Task") {
-				classToMake += "public class " + tablename + "\n{\n" + data + "\n}\n";
-			} else {
-				classToMake += "public class " + tablename + " : Task \n{\n" + data + "\n}\n";
-			}
-		} else if (language == "python"){
-			if (tablename == "Task"){
-				classToMake += "class " + tablename + ":\n" + data;
-			} else {
-				classToMake += "class " + tablename + "(Task):\n" + data;
-			}
-		} else if (language == "ruby"){
-			if (tablename == "Task"){
-				classToMake += 'class ' + tablename + "\n" + data;
-			} else {
-				classToMake += 'class ' + tablename + " < Task\n" + data;
-			}
-			
-		}
-		return classToMake;
-	},
-	capitalizeFirstLetter: function (word){
-		return word.charAt(0).toUpperCase() + word.slice(1);
-	},
-	replaceUnderscoresWithCamelCase: function (item){
-		if (item.indexOf("_") > -1) {
-			var strings = item.split("_");
-			for (var i = 1; i < strings.length; i++){
-				strings[i] = this.capitalizeFirstLetter(strings[i]);
-			}
-			return strings.join().replace(/,/g, '');
-		}
-		return item;
-	},
-	getJavaVariables: function (gr, tableName){
-		var data = '';
-		while (gr.next()){
-			var element = gr.element;
-			if (this.camelCase){
-				element = this.replaceUnderscoresWithCamelCase(element);
-			}
-			if (gr.internal_type.getDisplayValue() == "Reference"){
-				data += ("@FindBy(id=\"sys_display." + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
-			} else if (gr.internal_type == "boolean"){
-				data += ("@FindBy(id=\"ni." + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
-			} else {
-				data += ("@FindBy(id=\"" + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
-			}
-			data += ("@FindBy(id=\"status." + tableName + "." + gr.element + "\")\npublic WebElement " + element + "Span;\n\n");
-		}
-		data += ("@FindBy(id=\"sys_uniqueValue\")\npublic WebElement sysId;\n");
-		return data;
-	},
-	getJavascriptVariables : function (gr, tableName){
-		var data = '';
-		while (gr.next()){
-			var element = gr.element;
-			if (this.camelCase){
-				element = this.replaceUnderscoresWithCamelCase(element);
-			}
-			if (gr.internal_type.getDisplayValue() == "Reference"){
-				data += ("var " + gr.element + " = driver.findElement(By.id(\"sys_display." + tableName + "." + element + "\"));\n");
-			} else if (gr.internal_type == "boolean"){
-				data += ("var " + gr.element + " = driver.findElement(By.id(\"ni." + tableName + "." + element + "\"));\n");
-			} else {
-				data += ("var " + gr.element + " = driver.findElement(By.id(\"" + tableName + "." + element + "\"));\n");
-			}
-			data += ("var " + gr.element + "Span = driver.findElement(By.id(\"status." + tableName + "." + element + "\"));\n\n");
-		}
-		data += ("var sysId = driver.findElement(By.id(\" sys_uniqueValue\");\n");
-		data += "\n}";
-		return data;
-	},
-	getCSharpVariables : function (gr, tableName){
-		var data = '';
-		while(gr.next()){
-			var element = gr.element;
-			if (this.camelCase){
-				element = this.replaceUnderscoresWithCamelCase(element);
-			}
-			if (gr.internal_type.getDisplayValue() == "Reference"){
-				data += ("[FindsBy(How = How.Id, Using = \"sys_display." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
-			} else if (gr.internal_type == "boolean"){
-				data += ("[FindsBy(How = How.Id, Using = \"ni." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
-			} else {
-				data += ("[FindsBy(How = How.Id, Using = \"" + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
-			}
-			data += ("[FindsBy(How = How.Id, Using = \"status." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + "Span;\n\n");
-		}
-		data += ("[FindsBy(How = How.Id, Using = \"sys_uniqueValue\")]\npublic IWebElement sysId;");
-		return data;
-	},
-	getPythonVariables : function (gr, tableName){
-		var data = '';
-		while (gr.next()){
-			var element = gr.element;
-			if (this.camelCase){
-				element = this.replaceUnderscoresWithCamelCase(element);
-			}
-			if (gr.internal_type.getDisplayValue() == "Reference"){
-				data += (element + " = driver.find_element_by_id('sys_display." + tableName + "." + gr.element + "')");
-			} else if (gr.internal+type == "boolean"){
-				data += (element + " = driver.find_element_by_id('ni." + tableName + "." + gr.element + "')");
-			} else {
-				data += (element + " = driver.find_element_by_id('" + tableName + "." + gr.element + "')");
-			}
-		}
-		data += ("sysId = driver.find_element_by_id('sys_uniqueValue')");
-		return data;
-	},
-	getRubyVariables: function (gr, tableName){
-		var data = '';
-		while(gr.next()){
-			var element = gr.element;
-			if (this.camelCase){
-				element = this.replaceUnderscoresWithCamelCase(element);
-			}
-			if (gr.internal_type.getDisplayValue() == "Reference"){
-				data += (element + " = driver.find_element(:id, 'sys_display." + tableName + "." + gr.element + "')");
-			} else if (gr.internal_type == "boolean"){
-				data += (element + " = driver.find_element(:id, 'ni." + tableName + "." + gr.element + "')");
-			} else {
-				data += (element +  "Span = driver.find_element(:id, '" + tableName + "." + gr.element + "')");
-			}
-		}
-		data += ("sysId = driver.find_element(:id, 'sys_uniqueValue')");
-		return data;
-	},
-	type: 'ClassCreator'
-}]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>2</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 19:29:26</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N)/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>ee6088116431790032f726a7a44befa8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!:N)/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 19:29:26</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>13b8efce4592310032f7c1e7386b6dd3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table/>
-<target_name>ClassCreator</target_name>
-<type>Script Include</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sysauto_script_851a90916431790032f726a7a44befba</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate Task Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:18</run_start><run_time>1970-01-01 20:16:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new ClassCreator();
-generator.getTaskTables(gs.getProperty('classgen.language', 'java'), gs.getProperty('classgen.camelcase', true));]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 20:14:33</sys_created_on><sys_id>851a90916431790032f726a7a44befba</sys_id><sys_mod_count>1</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:21:05</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>13b8efce4592310032f7c1e7386b6dd4</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table/>
-<target_name>Generate Task Classes</target_name>
-<type>Scheduled Script Execution</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
 <sys_update_xml action="INSERT_OR_UPDATE">
 <action>INSERT_OR_UPDATE</action>
 <application display_value=""/>
@@ -478,14 +240,14 @@ ClassCreator.prototype = {
 	},
 	type: 'ClassCreator'
 }]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>7</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-29 22:48:24</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N)/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>ee6088116431790032f726a7a44befa8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!:N)/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-29 22:48:24</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>17b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>000861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>ClassCreator</target_name>
 <type>Script Include</type>
@@ -801,14 +563,14 @@ CatalogClassCreator.prototype = {
 	
 	type: 'CatalogClassCreator'
 };]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 19:27:10</sys_created_on><sys_id>d51bc0516431790032f726a7a44bef30</sys_id><sys_mod_count>11</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:42:09</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!?B#/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 19:27:10</sys_created_on><sys_id>a4fc17ce4592310032f7c1e7386b6dba</sys_id><sys_mod_count>0</sys_mod_count><sys_name>CatalogClassCreator</sys_name><sys_parent/><sys_path>!!?B#/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>d51bc0516431790032f726a7a44bef30</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_d51bc0516431790032f726a7a44bef30</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:42:09</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>17b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>000861624516310032f7c1e7386b6d77</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>CatalogClassCreator</target_name>
 <type>Script Include</type>
@@ -823,14 +585,14 @@ CatalogClassCreator.prototype = {
 <comments/>
 <name>sys_documentation_class_generator_u_tablename_en</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_tablename" label="tablename" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element>u_tablename</element><help/><hint/><label>tablename</label><language>en</language><name>class_generator</name><plural>tablenames</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>09aeb7016431790032f726a7a44beff1</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:25</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N(/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>8daeb7016431790032f726a7a44beff1</sys_id><sys_mod_count>1</sys_mod_count><sys_name>tablename</sys_name><sys_parent display_value="tablename">81aeb7016431790032f726a7a44beff1</sys_parent><sys_path>!!:M{/!!:N&amp;/!!:N(/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_tablename" language="en" name="class_generator" sys_source_table="sys_documentation">09aeb7016431790032f726a7a44beff1</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator_u_tablename_en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:25</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>1bb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>040861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>class_generator</table>
 <target_name>Class Generator.tablename</target_name>
 <type>Field Label</type>
@@ -845,14 +607,14 @@ CatalogClassCreator.prototype = {
 <comments/>
 <name>sys_dictionary_class_generator_u_language</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="u_language" table="class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>language</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_language</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>10000</max_length><name>class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>a76eb7016431790032f726a7a44bef45</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M~/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>f4aeb7016431790032f726a7a44bef49</sys_id><sys_mod_count>1</sys_mod_count><sys_name>language</sys_name><sys_parent display_value="Class Generator">af5e77016431790032f726a7a44befd4</sys_parent><sys_path>!!:M{/!!:M~/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_language" name="class_generator" sys_source_table="sys_dictionary">a76eb7016431790032f726a7a44bef45</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_class_generator_u_language</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>1fb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>080861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>class_generator</table>
 <target_name>Class Generator.language</target_name>
 <type>Dictionary</type>
@@ -863,112 +625,97 @@ CatalogClassCreator.prototype = {
 <sys_update_xml action="INSERT_OR_UPDATE">
 <action>INSERT_OR_UPDATE</action>
 <application display_value=""/>
-<category>customer</category>
+<category/>
 <comments/>
 <name>sys_script_include_1c3f3b016431790032f726a7a44befaf</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="INSERT_OR_UPDATE"><active>true</active><client_callable>false</client_callable><description>Generates classes in various programming languages for use with Selenium browser automation.</description><name>ClassCreator</name><script><![CDATA[/**
- * ClassCreator - Creates classes for Selenium automated browser testing
- * @type {Class}
- */
-var ClassCreator = Class.create();
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="INSERT_OR_UPDATE"><active>true</active><client_callable>false</client_callable><description/><name>ClassCreator</name><script><![CDATA[var ClassCreator = Class.create();
 ClassCreator.prototype = {
-	/**
-	 * initialize - Initializes values for the running of the script
-	 * @param  {string} camelCaseVariables True for camelCase; false for non_camel_case
-	 * @param  {string} language           Which programming language
-	 * @param  {string} tableType          A table type (Task, CMDB) - Basically, any table that is extended
-	 */
-	initialize: function(camelCaseVariables, language, tableType) {
-		this.camelCase = camelCaseVariables;
-		this.language = language;		
-		this.tableType = tableType;
+	initialize: function() {
+		this.camelCase = true;
 	},
-	/**
-	 * getTaskTables Entry point for the class; creates records in the Class Generator table (or udpates them)
-	 */
-	getTaskTables: function(){
+	getTaskTables: function(language, camelCaseVariables){
+		this.camelCase = camelCaseVariables;
 		var gr = new GlideRecord('sys_db_object');
-		gr.addEncodedQuery('super_class.name=' + this.tableType + '^ORname=' + this.tableType);
+		gr.addEncodedQuery('super_class.name=task^ORname=task');
 		gr.query();
 		while(gr.next()){
 			var classTable = new GlideRecord('class_generator');
 			classTable.addQuery('u_tablename', gr.name);
-			classTable.addQuery('u_language', this.language);
+			classTable.addQuery('u_language', language);
 			classTable.query();
 			if (classTable.next()){
-				classTable.u_class_body = (this.getTableVariables(gr.name, this.language));
+				classTable.u_class_body = (this.getTableVariables(gr.name, language));
 				classTable.update();
 			} else {
 				var newClassTable = new GlideRecord('class_generator');
 				newClassTable.initialize();
-				newClassTable.u_language = this.language;
+				newClassTable.u_language = language;
 				newClassTable.u_tablename = gr.name;
-				newClassTable.u_class_body = (this.getTableVariables(gr.name));
+				newClassTable.u_class_body = (this.getTableVariables(gr.name, language));
 				newClassTable.insert();
 			}
 		}
 	},
-	/**
-	 * getTableVariables - Starts a dictionary table query based on the table and its parent
-	 * @param  {string} tableName The table to query for
-	 * @return {string}           Data to insert into the table
-	 */
-	getTableVariables: function (tableName){
+	getTableVariables: function (tableName, language){
 		var gr = new GlideRecord('sys_dictionary');
-		gr.addEncodedQuery('nameIN' + tableName + ', ' + this.tableType + '^element!=sys_id');
+		gr.addEncodedQuery('nameIN' + tableName + '^element!=sys_id');
 		gr.query();
 		var data;
-		if (this.language == "java"){
+		if (language == "java"){
 			data = this.getJavaVariables(gr, tableName);
-		} else if (this.language == "javascript"){
+		} else if (language == "javascript"){
 			data = this.getJavascriptVariables(gr, tableName);
-		} else if (this.language == "csharp"){
+		} else if (language == "csharp"){
 			data = this.getCSharpVariables(gr, tableName);
-		} else if (this.language == "python"){
+		} else if (language == "python"){
 			data = this.getPythonVariables(gr, tableName);
-		} else if (this.language == "ruby"){
+		} else if (language == "ruby"){
 			data = this.getRubyVariables(gr, tableName);
 		}
-		return this.generateClass(data, tableName);
+		return this.generateClass(data, tableName, language);
 	},
-	/**
-	 * generateClass - Generates a class in the appropriate language
-	 * @param  {string} data      A list of variables in a particular programming language
-	 * @param  {string} tablename The table name of the class
-	 * @return {string}           Data to insert into the table
-	 */
-	generateClass: function (data, tablename){
+	generateClass: function (data, tablename, language){
 		var classToMake = '';
 		tablename = this.capitalizeFirstLetter(tablename);
 		if (this.camelCase){
 			tablename = this.replaceUnderscoresWithCamelCase(tablename);
 		}
-		if (this.language == 'java'){
-			classToMake += 'public class ' + tablename + "{\n" + data + "\n}\n\n";
+		if (language == 'java'){
+			if (tablename == "Task"){
+				classToMake += 'public class ' + tablename + "{\n" + data + "\n}\n\n";
+			} else {
+				classToMake += 'public class ' + tablename + " extends Task {\n" + data + "\n}\n\n";
+			}
 		} else if (language == "javascript"){
 			classToMake += 'var ' + tablename + " = {\n" + data + "\n}\n";
-		} else if (this.language == "csharp"){
-			classToMake += "public class " + tablename + "\n{\n" + data + "\n}\n";
-		} else if (this.language == "python"){
-			classToMake += "class " + tablename + ":\n" + data;
-		} else if (this.language == "ruby"){
-			classToMake += 'class ' + tablename + "\n" + data;			
+			if (tablename != "Task"){
+				classToMake += tablename + ".prototype = new Task()";
+			}
+		} else if (language == "csharp"){
+			if (tablename == "Task") {
+				classToMake += "public class " + tablename + "\n{\n" + data + "\n}\n";
+			} else {
+				classToMake += "public class " + tablename + " : Task \n{\n" + data + "\n}\n";
+			}
+		} else if (language == "python"){
+			if (tablename == "Task"){
+				classToMake += "class " + tablename + ":\n" + data;
+			} else {
+				classToMake += "class " + tablename + "(Task):\n" + data;
+			}
+		} else if (language == "ruby"){
+			if (tablename == "Task"){
+				classToMake += 'class ' + tablename + "\n" + data;
+			} else {
+				classToMake += 'class ' + tablename + " < Task\n" + data;
+			}
+			
 		}
 		return classToMake;
 	},
-	/**
-	 * capitalizeFirstLetter - Capitalizes the first letter of a word
-	 * @param  {string} word The word to capitalize
-	 * @return {string}      A word with the first word capitalized
-	 */
 	capitalizeFirstLetter: function (word){
 		return word.charAt(0).toUpperCase() + word.slice(1);
 	},
-	/**
-	 * replaceUnderscoresWithCamelCase - Takes a word and makes it camelCase
-	 * @param  {string} item The string to make camelCase
-	 * @return {string}      A camelCase version of the passed string
-	 */
 	replaceUnderscoresWithCamelCase: function (item){
 		if (item.indexOf("_") > -1) {
 			var strings = item.split("_");
@@ -979,12 +726,6 @@ ClassCreator.prototype = {
 		}
 		return item;
 	},
-	/**
-	 * getJavaVariables - Creates variables based on the Java programming language
-	 * @param  {GlideRecord} gr        Record containing dictionary entries
-	 * @param  {string} tableName The tablenames
-	 * @return {string}           A list of variables
-	 */
 	getJavaVariables: function (gr, tableName){
 		var data = '';
 		while (gr.next()){
@@ -1004,12 +745,6 @@ ClassCreator.prototype = {
 		data += ("@FindBy(id=\"sys_uniqueValue\")\npublic WebElement sysId;\n");
 		return data;
 	},
-	/**
-	 * getJavascriptVariables - Creates variables based on the Javascript programming language
-	 * @param  {GlideRecord} gr        Record containing dictionary entries
-	 * @param  {string} tableName The tablenames
-	 * @return {string}           A list of variables
-	 */
 	getJavascriptVariables : function (gr, tableName){
 		var data = '';
 		while (gr.next()){
@@ -1030,12 +765,6 @@ ClassCreator.prototype = {
 		data += "\n}";
 		return data;
 	},
-	/**
-	 * getCSharpVariables - Creates variables based on the C# programming language
-	 * @param  {GlideRecord} gr        Record containing dictionary entries
-	 * @param  {string} tableName The tablenames
-	 * @return {string}           A list of variables
-	 */
 	getCSharpVariables : function (gr, tableName){
 		var data = '';
 		while(gr.next()){
@@ -1055,12 +784,6 @@ ClassCreator.prototype = {
 		data += ("[FindsBy(How = How.Id, Using = \"sys_uniqueValue\")]\npublic IWebElement sysId;");
 		return data;
 	},
-	/**
-	 * getPythonVariables - Creates variables based on the Python programming language
-	 * @param  {GlideRecord} gr        Record containing dictionary entries
-	 * @param  {string} tableName The tablenames
-	 * @return {string}           A list of variables
-	 */
 	getPythonVariables : function (gr, tableName){
 		var data = '';
 		while (gr.next()){
@@ -1075,17 +798,10 @@ ClassCreator.prototype = {
 			} else {
 				data += (element + " = driver.find_element_by_id('" + tableName + "." + gr.element + "')");
 			}
-			data += (element + "Span = driver.find_element_by_id('status." + tableName + "." + gr.element + "')");
 		}
 		data += ("sysId = driver.find_element_by_id('sys_uniqueValue')");
 		return data;
 	},
-	/**
-	 * getRubyVariables - Creates variables based on the Ruby programming language
-	 * @param  {GlideRecord} gr        Record containing dictionary entries
-	 * @param  {string} tableName The tablenames
-	 * @return {string}           A list of variables
-	 */
 	getRubyVariables: function (gr, tableName){
 		var data = '';
 		while(gr.next()){
@@ -1098,23 +814,22 @@ ClassCreator.prototype = {
 			} else if (gr.internal_type == "boolean"){
 				data += (element + " = driver.find_element(:id, 'ni." + tableName + "." + gr.element + "')");
 			} else {
-				data += (element +  "= driver.find_element(:id, '" + tableName + "." + gr.element + "')");
+				data += (element +  "Span = driver.find_element(:id, '" + tableName + "." + gr.element + "')");
 			}
-			data += (element +  "Span = driver.find_element(:id, 'status." + tableName + "." + gr.element + "')");
 		}
 		data += ("sysId = driver.find_element(:id, 'sys_uniqueValue')");
 		return data;
 	},
 	type: 'ClassCreator'
-}]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>4</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:29:14</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!?B!/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>10fc17ce4592310032f7c1e7386b6db9</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!?B!/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:29:14</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+}]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>2</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 19:29:26</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N)/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>ee6088116431790032f726a7a44befa8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!:N)/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 19:29:26</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>53b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>0c0861624516310032f7c1e7386b6d75</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>ClassCreator</target_name>
 <type>Script Include</type>
@@ -1127,19 +842,20 @@ ClassCreator.prototype = {
 <application display_value=""/>
 <category/>
 <comments/>
-<name>sys_properties_3f6bf0a56471790032f726a7a44bef2a</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices>java, javascript, python, csharp, ruby</choices><description>What language you want the Selenium classes to be generated in (by default)</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>classgen.language</name><read_roles/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:08</sys_created_on><sys_id>3f6bf0a56471790032f726a7a44bef2a</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:08</sys_updated_on><type>string</type><value>java</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=3f6bf0a56471790032f726a7a44bef2a"/><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N:/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:08</sys_created_on><sys_id>819bf0a56471790032f726a7a44bef1c</sys_id><sys_mod_count>1</sys_mod_count><sys_name>classgen.language</sys_name><sys_parent/><sys_path>!!:N:/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="classgen.language" sys_source_table="sys_properties">3f6bf0a56471790032f726a7a44bef2a</sys_source_id><sys_source_table>sys_properties</sys_source_table><sys_type/><sys_update_name>sys_properties_3f6bf0a56471790032f726a7a44bef2a</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:13</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<name>sysauto_script_851a90916431790032f726a7a44befba</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate Task Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:18</run_start><run_time>1970-01-01 20:16:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new ClassCreator();
+generator.getTaskTables(gs.getProperty('classgen.language', 'java'), gs.getProperty('classgen.camelcase', true));]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 20:14:33</sys_created_on><sys_id>851a90916431790032f726a7a44befba</sys_id><sys_mod_count>1</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:21:05</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>53b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>0c0861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
-<target_name>classgen.language</target_name>
-<type>System Property</type>
+<target_name>Generate Task Classes</target_name>
+<type>Scheduled Script Execution</type>
 <update_domain>global</update_domain>
 <update_set display_value=""/>
 <view/>
@@ -1151,14 +867,14 @@ ClassCreator.prototype = {
 <comments/>
 <name>sys_documentation_class_generator__en</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="" label="Class Generator" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element/><help/><hint/><label>Class Generator</label><language>en</language><name>class_generator</name><plural>Class Generators</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>af5e77016431790032f726a7a44befd6</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M}/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>a35e77016431790032f726a7a44befd7</sys_id><sys_mod_count>1</sys_mod_count><sys_name>Class Generator</sys_name><sys_parent display_value="class_generator">eb5e77016431790032f726a7a44befd5</sys_parent><sys_path>!!:M{/!!:M|/!!:M}/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="NULL" language="en" name="class_generator" sys_source_table="sys_documentation">af5e77016431790032f726a7a44befd6</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator__en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:15</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>57b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>400861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>class_generator</table>
 <target_name>Class Generator</target_name>
 <type>Field Label</type>
@@ -1174,14 +890,14 @@ ClassCreator.prototype = {
 <name>sysauto_script_413a90916431790032f726a7a44befd2</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate SC Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:50</run_start><run_time>1970-01-01 20:18:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new CatalogClassCreator();
 generator.processServiceCatalog(gs.getProperty('classgen.language', 'java'), gs.getProperty('classgen.camelcase', true));]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 20:15:07</sys_created_on><sys_id>413a90916431790032f726a7a44befd2</sys_id><sys_mod_count>2</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:20:47</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>57b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>400861624516310032f7c1e7386b6d77</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>Generate SC Classes</target_name>
 <type>Scheduled Script Execution</type>
@@ -1436,14 +1152,14 @@ CatalogClassCreator.prototype = {
 	
 	type: 'CatalogClassCreator'
 };]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 19:27:10</sys_created_on><sys_id>d51bc0516431790032f726a7a44bef30</sys_id><sys_mod_count>10</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 21:05:07</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N*/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 19:27:10</sys_created_on><sys_id>ba4f84516431790032f726a7a44bef94</sys_id><sys_mod_count>0</sys_mod_count><sys_name>CatalogClassCreator</sys_name><sys_parent/><sys_path>!!:N*/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>d51bc0516431790032f726a7a44bef30</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_d51bc0516431790032f726a7a44bef30</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 21:05:07</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>5bb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>440861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>CatalogClassCreator</target_name>
 <type>Script Include</type>
@@ -1458,14 +1174,14 @@ CatalogClassCreator.prototype = {
 <comments/>
 <name>sys_dictionary_class_generator_null</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="" table="class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice>0</choice><choice_field/><choice_table/><column_label/><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element/><element_reference>false</element_reference><foreign_database/><internal_type display_value="Collection">collection</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>635e77016431790032f726a7a44befd5</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M|/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>eb5e77016431790032f726a7a44befd5</sys_id><sys_mod_count>1</sys_mod_count><sys_name>class_generator</sys_name><sys_parent display_value="Class Generator">af5e77016431790032f726a7a44befd4</sys_parent><sys_path>!!:M{/!!:M|/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="NULL" name="class_generator" sys_source_table="sys_dictionary">635e77016431790032f726a7a44befd5</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_class_generator_null</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:15</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>5fb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>480861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>class_generator</table>
 <target_name>Class Generator</target_name>
 <type>Dictionary</type>
@@ -1476,21 +1192,291 @@ CatalogClassCreator.prototype = {
 <sys_update_xml action="INSERT_OR_UPDATE">
 <action>INSERT_OR_UPDATE</action>
 <application display_value=""/>
-<category/>
+<category>customer</category>
 <comments/>
-<name>sys_documentation_class_generator_u_class_body_en</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_class_body" label="class_body" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element>u_class_body</element><help/><hint/><label>class_body</label><language>en</language><name>class_generator</name><plural>class_bodies</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>38aeb7016431790032f726a7a44befee</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N$/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>bcaeb7016431790032f726a7a44befee</sys_id><sys_mod_count>1</sys_mod_count><sys_name>class_body</sys_name><sys_parent display_value="class_body">b0aeb7016431790032f726a7a44befee</sys_parent><sys_path>!!:M{/!!:N#/!!:N$/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_class_body" language="en" name="class_generator" sys_source_table="sys_documentation">38aeb7016431790032f726a7a44befee</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator_u_class_body_en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:25</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<name>sys_script_include_1c3f3b016431790032f726a7a44befaf</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_script_include"><sys_script_include action="INSERT_OR_UPDATE"><active>true</active><client_callable>false</client_callable><description>Generates classes in various programming languages for use with Selenium browser automation.</description><name>ClassCreator</name><script><![CDATA[/**
+ * ClassCreator - Creates classes for Selenium automated browser testing
+ * @type {Class}
+ */
+var ClassCreator = Class.create();
+ClassCreator.prototype = {
+	/**
+	 * initialize - Initializes values for the running of the script
+	 * @param  {string} camelCaseVariables True for camelCase; false for non_camel_case
+	 * @param  {string} language           Which programming language
+	 * @param  {string} tableType          A table type (Task, CMDB) - Basically, any table that is extended
+	 */
+	initialize: function(camelCaseVariables, language, tableType) {
+		this.camelCase = camelCaseVariables;
+		this.language = language;		
+		this.tableType = tableType;
+	},
+	/**
+	 * getTaskTables Entry point for the class; creates records in the Class Generator table (or udpates them)
+	 */
+	getTaskTables: function(){
+		var gr = new GlideRecord('sys_db_object');
+		gr.addEncodedQuery('super_class.name=' + this.tableType + '^ORname=' + this.tableType);
+		gr.query();
+		while(gr.next()){
+			var classTable = new GlideRecord('class_generator');
+			classTable.addQuery('u_tablename', gr.name);
+			classTable.addQuery('u_language', this.language);
+			classTable.query();
+			if (classTable.next()){
+				classTable.u_class_body = (this.getTableVariables(gr.name, false));
+				classTable.update();
+			} else {
+				var newClassTable = new GlideRecord('class_generator');
+				newClassTable.initialize();
+				newClassTable.u_language = this.language;
+				newClassTable.u_tablename = gr.name;
+				newClassTable.u_class_body = (this.getTableVariables(gr.name, false));
+				newClassTable.insert();
+			}
+		}
+	},
+	/**
+	 * getCMDBTables Entry point for the class; creates records in the Class Generator table (or udpates them)
+	 */
+	getCMDBTables: function(){
+		var gr = new GlideRecord('sys_db_object');
+		gr.addEncodedQuery('super_class.name=' + this.tableType + '^ORnameIN' + this.tableType + ",cmdb_ci");
+		gr.query();
+		while(gr.next()){
+			var classTable = new GlideRecord('class_generator');
+			classTable.addQuery('u_tablename', gr.name);
+			classTable.addQuery('u_language', this.language);
+			classTable.query();
+			if (classTable.next()){
+				classTable.u_class_body = (this.getTableVariables(gr.name, true));
+				classTable.update();
+			} else {
+				var newClassTable = new GlideRecord('class_generator');
+				newClassTable.initialize();
+				newClassTable.u_language = this.language;
+				newClassTable.u_tablename = gr.name;
+				newClassTable.u_class_body = (this.getTableVariables(gr.name, true));
+				newClassTable.insert();
+			}
+		}
+	},
+	/**
+	 * getTableVariables - Starts a dictionary table query based on the table and its parent
+	 * @param  {string}  tableName The table to query for
+	 * @param  {boolean} cmdbFlag  True if this is for cmdb (we want to ensure we get the base table, even if we're down a level or two of inheritance)
+	 * @return {string}            Data to insert into the table
+	 */
+	getTableVariables: function (tableName, cmdbFlag){
+		var gr = new GlideRecord('sys_dictionary');
+		if (cmdbFlag){
+			gr.addEncodedQuery('nameIN' + tableName + ', ' + this.tableType + ',cmdb_ci^element!=sys_id');
+		} else {
+			gr.addEncodedQuery('nameIN' + tableName + ', ' + this.tableType + '^element!=sys_id');
+		}
+		gr.query();
+		var data;
+		if (this.language == "java"){
+			data = this.getJavaVariables(gr, tableName);
+		} else if (this.language == "javascript"){
+			data = this.getJavascriptVariables(gr, tableName);
+		} else if (this.language == "csharp"){
+			data = this.getCSharpVariables(gr, tableName);
+		} else if (this.language == "python"){
+			data = this.getPythonVariables(gr, tableName);
+		} else if (this.language == "ruby"){
+			data = this.getRubyVariables(gr, tableName);
+		}
+		return this.generateClass(data, tableName);
+	},
+	/**
+	 * generateClass - Generates a class in the appropriate language
+	 * @param  {string} data      A list of variables in a particular programming language
+	 * @param  {string} tablename The table name of the class
+	 * @return {string}           Data to insert into the table
+	 */
+	generateClass: function (data, tablename){
+		var classToMake = '';
+		tablename = this.capitalizeFirstLetter(tablename);
+		if (this.camelCase){
+			tablename = this.replaceUnderscoresWithCamelCase(tablename);
+		}
+		if (this.language == 'java'){
+			classToMake += 'public class ' + tablename + " extends BaseTest {\n" + data + "\n}\n\n";
+		} else if (language == "javascript"){
+			classToMake += 'var ' + tablename + " = {\n" + data + "\n}\n";
+		} else if (this.language == "csharp"){
+			classToMake += "public class " + tablename + "\n{\n" + data + "\n}\n";
+		} else if (this.language == "python"){
+			classToMake += "class " + tablename + ":\n" + data;
+		} else if (this.language == "ruby"){
+			classToMake += 'class ' + tablename + "\n" + data;			
+		}
+		return classToMake;
+	},
+	/**
+	 * capitalizeFirstLetter - Capitalizes the first letter of a word
+	 * @param  {string} word The word to capitalize
+	 * @return {string}      A word with the first word capitalized
+	 */
+	capitalizeFirstLetter: function (word){
+		return word.charAt(0).toUpperCase() + word.slice(1);
+	},
+	/**
+	 * replaceUnderscoresWithCamelCase - Takes a word and makes it camelCase
+	 * @param  {string} item The string to make camelCase
+	 * @return {string}      A camelCase version of the passed string
+	 */
+	replaceUnderscoresWithCamelCase: function (item){
+		if (item.indexOf("_") > -1) {
+			var strings = item.split("_");
+			for (var i = 1; i < strings.length; i++){
+				strings[i] = this.capitalizeFirstLetter(strings[i]);
+			}
+			return strings.join().replace(/,/g, '');
+		}
+		return item;
+	},
+	/**
+	 * getJavaVariables - Creates variables based on the Java programming language
+	 * @param  {GlideRecord} gr        Record containing dictionary entries
+	 * @param  {string} tableName The tablenames
+	 * @return {string}           A list of variables
+	 */
+	getJavaVariables: function (gr, tableName){
+		var data = '';
+		while (gr.next()){
+			var element = gr.element;
+			if (this.camelCase){
+				element = this.replaceUnderscoresWithCamelCase(element);
+			}
+			if (gr.internal_type.getDisplayValue() == "Reference"){
+				data += ("@FindBy(id=\"sys_display." + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
+			} else if (gr.internal_type == "boolean"){
+				data += ("@FindBy(id=\"ni." + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
+			} else {
+				data += ("@FindBy(id=\"" + tableName + "." + gr.element + "\")\npublic WebElement " + element + ";\n");
+			}
+			data += ("@FindBy(id=\"status." + tableName + "." + gr.element + "\")\npublic WebElement " + element + "Span;\n\n");
+		}
+		data += ("@FindBy(id=\"sys_uniqueValue\")\npublic WebElement sysId;\n");
+		return data;
+	},
+	/**
+	 * getJavascriptVariables - Creates variables based on the Javascript programming language
+	 * @param  {GlideRecord} gr        Record containing dictionary entries
+	 * @param  {string} tableName The tablenames
+	 * @return {string}           A list of variables
+	 */
+	getJavascriptVariables : function (gr, tableName){
+		var data = '';
+		while (gr.next()){
+			var element = gr.element;
+			if (this.camelCase){
+				element = this.replaceUnderscoresWithCamelCase(element);
+			}
+			if (gr.internal_type.getDisplayValue() == "Reference"){
+				data += ("var " + gr.element + " = driver.findElement(By.id(\"sys_display." + tableName + "." + element + "\"));\n");
+			} else if (gr.internal_type == "boolean"){
+				data += ("var " + gr.element + " = driver.findElement(By.id(\"ni." + tableName + "." + element + "\"));\n");
+			} else {
+				data += ("var " + gr.element + " = driver.findElement(By.id(\"" + tableName + "." + element + "\"));\n");
+			}
+			data += ("var " + gr.element + "Span = driver.findElement(By.id(\"status." + tableName + "." + element + "\"));\n\n");
+		}
+		data += ("var sysId = driver.findElement(By.id(\" sys_uniqueValue\");\n");
+		data += "\n}";
+		return data;
+	},
+	/**
+	 * getCSharpVariables - Creates variables based on the C# programming language
+	 * @param  {GlideRecord} gr        Record containing dictionary entries
+	 * @param  {string} tableName The tablenames
+	 * @return {string}           A list of variables
+	 */
+	getCSharpVariables : function (gr, tableName){
+		var data = '';
+		while(gr.next()){
+			var element = gr.element;
+			if (this.camelCase){
+				element = this.replaceUnderscoresWithCamelCase(element);
+			}
+			if (gr.internal_type.getDisplayValue() == "Reference"){
+				data += ("[FindsBy(How = How.Id, Using = \"sys_display." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
+			} else if (gr.internal_type == "boolean"){
+				data += ("[FindsBy(How = How.Id, Using = \"ni." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
+			} else {
+				data += ("[FindsBy(How = How.Id, Using = \"" + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + ";\n");
+			}
+			data += ("[FindsBy(How = How.Id, Using = \"status." + tableName + "." + gr.element + "\")]\npublic IWebElement " + element + "Span;\n\n");
+		}
+		data += ("[FindsBy(How = How.Id, Using = \"sys_uniqueValue\")]\npublic IWebElement sysId;");
+		return data;
+	},
+	/**
+	 * getPythonVariables - Creates variables based on the Python programming language
+	 * @param  {GlideRecord} gr        Record containing dictionary entries
+	 * @param  {string} tableName The tablenames
+	 * @return {string}           A list of variables
+	 */
+	getPythonVariables : function (gr, tableName){
+		var data = '';
+		while (gr.next()){
+			var element = gr.element;
+			if (this.camelCase){
+				element = this.replaceUnderscoresWithCamelCase(element);
+			}
+			if (gr.internal_type.getDisplayValue() == "Reference"){
+				data += (element + " = driver.find_element_by_id('sys_display." + tableName + "." + gr.element + "')");
+			} else if (gr.internal+type == "boolean"){
+				data += (element + " = driver.find_element_by_id('ni." + tableName + "." + gr.element + "')");
+			} else {
+				data += (element + " = driver.find_element_by_id('" + tableName + "." + gr.element + "')");
+			}
+			data += (element + "Span = driver.find_element_by_id('status." + tableName + "." + gr.element + "')");
+		}
+		data += ("sysId = driver.find_element_by_id('sys_uniqueValue')");
+		return data;
+	},
+	/**
+	 * getRubyVariables - Creates variables based on the Ruby programming language
+	 * @param  {GlideRecord} gr        Record containing dictionary entries
+	 * @param  {string} tableName The tablenames
+	 * @return {string}           A list of variables
+	 */
+	getRubyVariables: function (gr, tableName){
+		var data = '';
+		while(gr.next()){
+			var element = gr.element;
+			if (this.camelCase){
+				element = this.replaceUnderscoresWithCamelCase(element);
+			}
+			if (gr.internal_type.getDisplayValue() == "Reference"){
+				data += (element + " = driver.find_element(:id, 'sys_display." + tableName + "." + gr.element + "')");
+			} else if (gr.internal_type == "boolean"){
+				data += (element + " = driver.find_element(:id, 'ni." + tableName + "." + gr.element + "')");
+			} else {
+				data += (element +  "= driver.find_element(:id, '" + tableName + "." + gr.element + "')");
+			}
+			data += (element +  "Span = driver.find_element(:id, 'status." + tableName + "." + gr.element + "')");
+		}
+		data += ("sysId = driver.find_element(:id, 'sys_uniqueValue')");
+		return data;
+	},
+	type: 'ClassCreator'
+}]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>8</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-20 19:35:39</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!?B!/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>10fc17ce4592310032f7c1e7386b6db9</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!?B!/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-20 19:35:39</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>93b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>4c0861624516310032f7c1e7386b6d75</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table>class_generator</table>
-<target_name>Class Generator.class_body</target_name>
-<type>Field Label</type>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table/>
+<target_name>ClassCreator</target_name>
+<type>Script Include</type>
 <update_domain>global</update_domain>
 <update_set display_value=""/>
 <view/>
@@ -1500,18 +1486,18 @@ CatalogClassCreator.prototype = {
 <application display_value=""/>
 <category/>
 <comments/>
-<name>sys_properties_31abf0a56471790032f726a7a44befee</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Whether or not the class generator uses camel case for variables by default</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>classgen.camelcase</name><read_roles/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:49</sys_created_on><sys_id>31abf0a56471790032f726a7a44befee</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:49</sys_updated_on><type>boolean</type><value>true</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=31abf0a56471790032f726a7a44befee"/><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N;/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:49</sys_created_on><sys_id>c3bbf0a56471790032f726a7a44beff0</sys_id><sys_mod_count>1</sys_mod_count><sys_name>classgen.camelcase</sys_name><sys_parent/><sys_path>!!:N;/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="classgen.camelcase" sys_source_table="sys_properties">31abf0a56471790032f726a7a44befee</sys_source_id><sys_source_table>sys_properties</sys_source_table><sys_type/><sys_update_name>sys_properties_31abf0a56471790032f726a7a44befee</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:54</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<name>sys_properties_3f6bf0a56471790032f726a7a44bef2a</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices>java, javascript, python, csharp, ruby</choices><description>What language you want the Selenium classes to be generated in (by default)</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>classgen.language</name><read_roles/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:08</sys_created_on><sys_id>3f6bf0a56471790032f726a7a44bef2a</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:08</sys_updated_on><type>string</type><value>java</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=3f6bf0a56471790032f726a7a44bef2a"/><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N:/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:08</sys_created_on><sys_id>819bf0a56471790032f726a7a44bef1c</sys_id><sys_mod_count>1</sys_mod_count><sys_name>classgen.language</sys_name><sys_parent/><sys_path>!!:N:/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="classgen.language" sys_source_table="sys_properties">3f6bf0a56471790032f726a7a44bef2a</sys_source_id><sys_source_table>sys_properties</sys_source_table><sys_type/><sys_update_name>sys_properties_3f6bf0a56471790032f726a7a44bef2a</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:13</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>93b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>4c0861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
-<target_name>classgen.camelcase</target_name>
+<target_name>classgen.language</target_name>
 <type>System Property</type>
 <update_domain>global</update_domain>
 <update_set display_value=""/>
@@ -1524,14 +1510,14 @@ CatalogClassCreator.prototype = {
 <comments/>
 <name>sys_dictionary_u_class_generator_u_tablename</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="u_tablename" table="u_class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>tablename</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_tablename</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>8a4e77016431790032f726a7a44befcf</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M^/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>5f5e77016431790032f726a7a44befd2</sys_id><sys_mod_count>1</sys_mod_count><sys_name>tablename</sys_name><sys_parent/><sys_path>!!:M^/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_tablename" name="u_class_generator" sys_source_table="sys_dictionary">8a4e77016431790032f726a7a44befcf</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_u_class_generator_u_tablename</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>97b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>800861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>u_class_generator</table>
 <target_name>u_class_generator.u_tablename</target_name>
 <type>Dictionary</type>
@@ -1546,14 +1532,14 @@ CatalogClassCreator.prototype = {
 <comments/>
 <name>sys_dictionary_class_generator_u_class_body</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary element="u_class_body" table="class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>class_body</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_class_body</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>9999</max_length><name>class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>fb7eb7016431790032f726a7a44bef46</sys_id><sys_mod_count>2</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:13:01</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N#/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>b0aeb7016431790032f726a7a44befee</sys_id><sys_mod_count>0</sys_mod_count><sys_name>class_body</sys_name><sys_parent display_value="Class Generator">af5e77016431790032f726a7a44befd4</sys_parent><sys_path>!!:M{/!!:N#/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_class_body" name="class_generator" sys_source_table="sys_dictionary">fb7eb7016431790032f726a7a44bef46</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_class_generator_u_class_body</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:13:01</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>97b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>800861624516310032f7c1e7386b6d77</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>class_generator</table>
 <target_name>Class Generator.class_body</target_name>
 <type>Dictionary</type>
@@ -1746,14 +1732,14 @@ ClassCreator.prototype = {
 	},
 	type: 'ClassCreator'
 }]]]]><![CDATA[></script><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>1c3f3b016431790032f726a7a44befaf</sys_id><sys_mod_count>5</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 19:51:58</sys_updated_on></sys_script_include><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N)/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:22:10</sys_created_on><sys_id>ee6088116431790032f726a7a44befa8</sys_id><sys_mod_count>0</sys_mod_count><sys_name>ClassCreator</sys_name><sys_parent/><sys_path>!!:N)/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id>1c3f3b016431790032f726a7a44befaf</sys_source_id><sys_source_table>sys_script_include</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_script_include_1c3f3b016431790032f726a7a44befaf</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 19:51:58</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>9bb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>840861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>ClassCreator</target_name>
 <type>Script Include</type>
@@ -1769,17 +1755,190 @@ ClassCreator.prototype = {
 <name>sysauto_script_851a90916431790032f726a7a44befba</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate Task Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:18</run_start><run_time>1970-01-01 20:16:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'task');
 generator.getTaskTables();]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 20:14:33</sys_created_on><sys_id>851a90916431790032f726a7a44befba</sys_id><sys_mod_count>4</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:09:27</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>9fb8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>880861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>Generate Task Classes</target_name>
 <type>Scheduled Script Execution</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_documentation_class_generator_u_class_body_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_class_body" label="class_body" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element>u_class_body</element><help/><hint/><label>class_body</label><language>en</language><name>class_generator</name><plural>class_bodies</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>38aeb7016431790032f726a7a44befee</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N$/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>bcaeb7016431790032f726a7a44befee</sys_id><sys_mod_count>1</sys_mod_count><sys_name>class_body</sys_name><sys_parent display_value="class_body">b0aeb7016431790032f726a7a44befee</sys_parent><sys_path>!!:M{/!!:N#/!!:N$/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_class_body" language="en" name="class_generator" sys_source_table="sys_documentation">38aeb7016431790032f726a7a44befee</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator_u_class_body_en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:25</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>8c0861624516310032f7c1e7386b6d75</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table>class_generator</table>
+<target_name>Class Generator.class_body</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_properties_31abf0a56471790032f726a7a44befee</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_properties"><sys_properties action="INSERT_OR_UPDATE"><choices/><description>Whether or not the class generator uses camel case for variables by default</description><ignore_cache>false</ignore_cache><is_private>false</is_private><name>classgen.camelcase</name><read_roles/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:49</sys_created_on><sys_id>31abf0a56471790032f726a7a44befee</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:49</sys_updated_on><type>boolean</type><value>true</value><write_roles/></sys_properties><sys_translated_text action="delete_multiple" query="documentkey=31abf0a56471790032f726a7a44befee"/><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N;/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-23 17:19:49</sys_created_on><sys_id>c3bbf0a56471790032f726a7a44beff0</sys_id><sys_mod_count>1</sys_mod_count><sys_name>classgen.camelcase</sys_name><sys_parent/><sys_path>!!:N;/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="classgen.camelcase" sys_source_table="sys_properties">31abf0a56471790032f726a7a44befee</sys_source_id><sys_source_table>sys_properties</sys_source_table><sys_type/><sys_update_name>sys_properties_31abf0a56471790032f726a7a44befee</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-23 17:19:54</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>8c0861624516310032f7c1e7386b6d76</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table/>
+<target_name>classgen.camelcase</target_name>
+<type>System Property</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT</action>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_dictionary_u_class_generator_u_class_body</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="u_class_body" table="u_class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>class_body</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_class_body</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>434e77016431790032f726a7a44befd0</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M`/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>135e77016431790032f726a7a44befd4</sys_id><sys_mod_count>1</sys_mod_count><sys_name>class_body</sys_name><sys_parent/><sys_path>!!:M`/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_class_body" name="u_class_generator" sys_source_table="sys_dictionary">434e77016431790032f726a7a44befd0</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_u_class_generator_u_class_body</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>c00861624516310032f7c1e7386b6d76</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table>u_class_generator</table>
+<target_name>u_class_generator.u_class_body</target_name>
+<type>Dictionary</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_documentation_class_generator_u_language_en</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_language" label="language" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element>u_language</element><help/><hint/><label>language</label><language>en</language><name>class_generator</name><plural>languages</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>7caeb7016431790032f726a7a44bef49</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N!/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>bcaeb7016431790032f726a7a44befeb</sys_id><sys_mod_count>1</sys_mod_count><sys_name>language</sys_name><sys_parent display_value="language">f4aeb7016431790032f726a7a44bef49</sys_parent><sys_path>!!:M{/!!:M~/!!:N!/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_language" language="en" name="class_generator" sys_source_table="sys_documentation">7caeb7016431790032f726a7a44bef49</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator_u_language_en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>c00861624516310032f7c1e7386b6d77</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table>class_generator</table>
+<target_name>Class Generator.language</target_name>
+<type>Field Label</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value=""/>
+<category>customer</category>
+<comments/>
+<name>sysauto_script_4b012bce4592310032f7c1e7386b6d1c</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate CMDB Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:18</run_start><run_time>1970-01-01 20:16:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_server');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_hardware');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_db_instance');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_infra_service');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_vm_instance');
+generator.getCMDBTables();
+
+generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci_spkg');
+generator.getCMDBTables();]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-02-19 15:10:26</sys_created_on><sys_id>4b012bce4592310032f7c1e7386b6d1c</sys_id><sys_mod_count>3</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-20 19:36:16</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>c40861624516310032f7c1e7386b6d76</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table/>
+<target_name>Generate CMDB Classes</target_name>
+<type>Scheduled Script Execution</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action>INSERT_OR_UPDATE</action>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_db_object_1f2e77016431790032f726a7a44befca</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_db_object"><sys_db_object action="INSERT_OR_UPDATE"><create_access_controls>false</create_access_controls><extension_model/><is_extendable>false</is_extendable><label>Class Generator</label><live_feed_enabled>false</live_feed_enabled><name>class_generator</name><number_ref/><provider_class/><super_class/><sys_app_file/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>1f2e77016431790032f726a7a44befca</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><user_role/></sys_db_object><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M{/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>af5e77016431790032f726a7a44befd4</sys_id><sys_mod_count>1</sys_mod_count><sys_name>Class Generator</sys_name><sys_parent/><sys_path>!!:M{/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="class_generator" sys_source_table="sys_db_object">1f2e77016431790032f726a7a44befca</sys_source_id><sys_source_table>sys_db_object</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_db_object_1f2e77016431790032f726a7a44befca</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:15</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>c80861624516310032f7c1e7386b6d75</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table>class_generator</table>
+<target_name>Class Generator</target_name>
+<type>Table</type>
+<update_domain>global</update_domain>
+<update_set display_value=""/>
+<view/>
+</sys_update_xml>
+<sys_update_xml action="INSERT_OR_UPDATE">
+<action/>
+<application display_value=""/>
+<category/>
+<comments/>
+<name>sys_dictionary_class_generator_u_tablename</name>
+<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary element="u_tablename" table="class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>tablename</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>true</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_tablename</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>2a8eb7016431790032f726a7a44bef47</sys_id><sys_mod_count>1</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:15:50</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N&amp;/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>81aeb7016431790032f726a7a44beff1</sys_id><sys_mod_count>0</sys_mod_count><sys_name>tablename</sys_name><sys_parent display_value="Class Generator">af5e77016431790032f726a7a44befd4</sys_parent><sys_path>!!:M{/!!:N&amp;/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_tablename" name="class_generator" sys_source_table="sys_dictionary">2a8eb7016431790032f726a7a44bef47</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_class_generator_u_tablename</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:15:50</sys_updated_on></sys_app_file></record_update>]]></payload>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
+<replace_on_upgrade>false</replace_on_upgrade>
+<sys_created_by>162107</sys_created_by>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>c80861624516310032f7c1e7386b6d76</sys_id>
+<sys_mod_count>0</sys_mod_count>
+<sys_updated_by>162107</sys_updated_by>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
+<table>class_generator</table>
+<target_name>Class Generator.tablename</target_name>
+<type>Dictionary</type>
 <update_domain>global</update_domain>
 <update_set display_value=""/>
 <view/>
@@ -1791,14 +1950,14 @@ generator.getTaskTables();]]]]><![CDATA[></script><sys_class_name>sysauto_script
 <comments/>
 <name>sys_dictionary_u_class_generator_u_language</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="u_language" table="u_class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>language</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_language</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:12</sys_created_on><sys_id>f72e77016431790032f726a7a44befce</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:12</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M]/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:12</sys_created_on><sys_id>9b5e77016431790032f726a7a44befd1</sys_id><sys_mod_count>1</sys_mod_count><sys_name>language</sys_name><sys_parent/><sys_path>!!:M]/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_language" name="u_class_generator" sys_source_table="sys_dictionary">f72e77016431790032f726a7a44befce</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_u_class_generator_u_language</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:12</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>d3b8efce4592310032f7c1e7386b6dd3</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>cc0861624516310032f7c1e7386b6d75</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table>u_class_generator</table>
 <target_name>u_class_generator.u_language</target_name>
 <type>Dictionary</type>
@@ -1814,128 +1973,17 @@ generator.getTaskTables();]]]]><![CDATA[></script><sys_class_name>sysauto_script
 <name>sysauto_script_413a90916431790032f726a7a44befd2</name>
 <payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate SC Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:50</run_start><run_time>1970-01-01 20:18:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new CatalogClassCreator(gs.getProperty('classgen.camelcase', true), gs.getProperty('classgen.language', 'java'));
 generator.processServiceCatalog();]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 20:15:07</sys_created_on><sys_id>413a90916431790032f726a7a44befd2</sys_id><sys_mod_count>4</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:42:59</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
+<remote_update_set display_value="ClassGenerator">880861624516310032f7c1e7386b6d75</remote_update_set>
 <replace_on_upgrade>false</replace_on_upgrade>
 <sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>d3b8efce4592310032f7c1e7386b6dd4</sys_id>
+<sys_created_on>2015-02-20 19:38:33</sys_created_on>
+<sys_id>cc0861624516310032f7c1e7386b6d76</sys_id>
 <sys_mod_count>0</sys_mod_count>
 <sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
+<sys_updated_on>2015-02-20 19:38:33</sys_updated_on>
 <table/>
 <target_name>Generate SC Classes</target_name>
 <type>Scheduled Script Execution</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT</action>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sys_dictionary_u_class_generator_u_class_body</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary action="INSERT" element="u_class_body" table="u_class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>class_body</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>false</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_class_body</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>u_class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>434e77016431790032f726a7a44befd0</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M`/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>135e77016431790032f726a7a44befd4</sys_id><sys_mod_count>1</sys_mod_count><sys_name>class_body</sys_name><sys_parent/><sys_path>!!:M`/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_class_body" name="u_class_generator" sys_source_table="sys_dictionary">434e77016431790032f726a7a44befd0</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_u_class_generator_u_class_body</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>d7b8efce4592310032f7c1e7386b6dd3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table>u_class_generator</table>
-<target_name>u_class_generator.u_class_body</target_name>
-<type>Dictionary</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sys_documentation_class_generator_u_language_en</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_documentation element="u_language" label="language" language="en" table="class_generator"><sys_documentation action="INSERT_OR_UPDATE"><element>u_language</element><help/><hint/><label>language</label><language>en</language><name>class_generator</name><plural>languages</plural><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>7caeb7016431790032f726a7a44bef49</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on><url/><url_target/></sys_documentation></sys_documentation><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N!/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:24</sys_created_on><sys_id>bcaeb7016431790032f726a7a44befeb</sys_id><sys_mod_count>1</sys_mod_count><sys_name>language</sys_name><sys_parent display_value="language">f4aeb7016431790032f726a7a44bef49</sys_parent><sys_path>!!:M{/!!:M~/!!:N!/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_language" language="en" name="class_generator" sys_source_table="sys_documentation">7caeb7016431790032f726a7a44bef49</sys_source_id><sys_source_table>sys_documentation</sys_source_table><sys_type/><sys_update_name>sys_documentation_class_generator_u_language_en</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:14:24</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>d7b8efce4592310032f7c1e7386b6dd4</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table>class_generator</table>
-<target_name>Class Generator.language</target_name>
-<type>Field Label</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value=""/>
-<category>customer</category>
-<comments/>
-<name>sysauto_script_4b012bce4592310032f7c1e7386b6d1c</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sysauto_script"><sysauto_script action="INSERT_OR_UPDATE"><active>true</active><condition/><conditional>false</conditional><name>Generate CMDB Classes</name><run_as display_value="Justin Bauguess">6b39cf5b3d514d40536529c60b915ff6</run_as><run_as_tz/><run_dayofmonth>1</run_dayofmonth><run_dayofweek>1</run_dayofweek><run_period/><run_start>2015-01-22 20:14:18</run_start><run_time>1970-01-01 20:16:00</run_time><run_type>daily</run_type><script><![CDATA[var generator = new ClassCreator(gs.getProperty('classgen.camelcase', true),gs.getProperty('classgen.language', 'java'),  'cmdb_ci');
-generator.getTaskTables();]]]]><![CDATA[></script><sys_class_name>sysauto_script</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-02-19 15:10:26</sys_created_on><sys_id>4b012bce4592310032f7c1e7386b6d1c</sys_id><sys_mod_count>1</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-02-19 15:10:39</sys_updated_on><upgrade_safe>false</upgrade_safe></sysauto_script></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>dbb8efce4592310032f7c1e7386b6dd3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table/>
-<target_name>Generate CMDB Classes</target_name>
-<type>Scheduled Script Execution</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action>INSERT_OR_UPDATE</action>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sys_db_object_1f2e77016431790032f726a7a44befca</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update table="sys_db_object"><sys_db_object action="INSERT_OR_UPDATE"><create_access_controls>false</create_access_controls><extension_model/><is_extendable>false</is_extendable><label>Class Generator</label><live_feed_enabled>false</live_feed_enabled><name>class_generator</name><number_ref/><provider_class/><super_class/><sys_app_file/><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>1f2e77016431790032f726a7a44befca</sys_id><sys_mod_count>0</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:13</sys_updated_on><user_role/></sys_db_object><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:M{/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:13:13</sys_created_on><sys_id>af5e77016431790032f726a7a44befd4</sys_id><sys_mod_count>1</sys_mod_count><sys_name>Class Generator</sys_name><sys_parent/><sys_path>!!:M{/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id name="class_generator" sys_source_table="sys_db_object">1f2e77016431790032f726a7a44befca</sys_source_id><sys_source_table>sys_db_object</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_db_object_1f2e77016431790032f726a7a44befca</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 18:13:15</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>dfb8efce4592310032f7c1e7386b6dd2</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table>class_generator</table>
-<target_name>Class Generator</target_name>
-<type>Table</type>
-<update_domain>global</update_domain>
-<update_set display_value=""/>
-<view/>
-</sys_update_xml>
-<sys_update_xml action="INSERT_OR_UPDATE">
-<action/>
-<application display_value=""/>
-<category/>
-<comments/>
-<name>sys_dictionary_class_generator_u_tablename</name>
-<payload><![CDATA[<?xml version="1.0" encoding="UTF-8"?><record_update><sys_dictionary element="u_tablename" table="class_generator"><active>true</active><array>false</array><attributes/><audit>false</audit><calculation/><choice/><choice_field/><choice_table/><column_label>tablename</column_label><comments/><create_roles/><default_value/><defaultsort/><delete_roles/><dependent/><dependent_on_field/><display>true</display><dynamic_creation>false</dynamic_creation><dynamic_creation_script/><dynamic_default_value/><dynamic_ref_qual/><element>u_tablename</element><element_reference>false</element_reference><foreign_database/><internal_type display_value="String">string</internal_type><mandatory>false</mandatory><max_length>40</max_length><name>class_generator</name><next_element/><primary>false</primary><read_only>false</read_only><read_roles/><reference/><reference_cascade_rule/><reference_floats>false</reference_floats><reference_key/><reference_qual/><reference_qual_condition/><reference_type/><sizeclass/><spell_check>false</spell_check><sys_class_name>sys_dictionary</sys_class_name><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>2a8eb7016431790032f726a7a44bef47</sys_id><sys_mod_count>1</sys_mod_count><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:15:50</sys_updated_on><table_reference>false</table_reference><text_index>false</text_index><u_model_id/><u_normalize_set/><unique>false</unique><use_dependent_field>false</use_dependent_field><use_dynamic_default>false</use_dynamic_default><use_reference_qualifier>simple</use_reference_qualifier><virtual>false</virtual><widget/><write_roles/><xml_view>false</xml_view></sys_dictionary><sys_app_file action="INSERT_OR_UPDATE"><customer_update>true</customer_update><publish_override/><replace_on_upgrade>false</replace_on_upgrade><restore/><sys_app/><sys_code>!!:N&amp;/</sys_code><sys_created_by>162107</sys_created_by><sys_created_on>2015-01-22 18:14:25</sys_created_on><sys_id>81aeb7016431790032f726a7a44beff1</sys_id><sys_mod_count>0</sys_mod_count><sys_name>tablename</sys_name><sys_parent display_value="Class Generator">af5e77016431790032f726a7a44befd4</sys_parent><sys_path>!!:M{/!!:N&amp;/</sys_path><sys_policy/><sys_source_deleted>false</sys_source_deleted><sys_source_id element="u_tablename" name="class_generator" sys_source_table="sys_dictionary">2a8eb7016431790032f726a7a44bef47</sys_source_id><sys_source_table>sys_dictionary</sys_source_table><sys_type>code</sys_type><sys_update_name>sys_dictionary_class_generator_u_tablename</sys_update_name><sys_updated_by>162107</sys_updated_by><sys_updated_on>2015-01-22 20:15:50</sys_updated_on></sys_app_file></record_update>]]></payload>
-<remote_update_set display_value="ClassGenerator">9fb8efce4592310032f7c1e7386b6dd2</remote_update_set>
-<replace_on_upgrade>false</replace_on_upgrade>
-<sys_created_by>162107</sys_created_by>
-<sys_created_on>2015-02-19 15:44:03</sys_created_on>
-<sys_id>dfb8efce4592310032f7c1e7386b6dd3</sys_id>
-<sys_mod_count>0</sys_mod_count>
-<sys_updated_by>162107</sys_updated_by>
-<sys_updated_on>2015-02-19 15:44:03</sys_updated_on>
-<table>class_generator</table>
-<target_name>Class Generator.tablename</target_name>
-<type>Dictionary</type>
 <update_domain>global</update_domain>
 <update_set display_value=""/>
 <view/>
