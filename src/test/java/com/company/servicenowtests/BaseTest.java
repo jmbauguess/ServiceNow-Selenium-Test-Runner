@@ -13,6 +13,8 @@ import org.openqa.selenium.NoAlertPresentException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.interactions.Action;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.ui.Duration;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -383,6 +385,33 @@ public class BaseTest {
             }
         }
         return null;
+    }
+    
+    /**
+     * Right clicks on a page element
+     * @param el The WebElement to right click on
+     */
+    public void rightClick(WebElement el){
+        Actions action = new Actions(driver);
+        Action rightClick = action.contextClick(el).build();
+        rightClick.perform();
+    }
+    
+    /**
+     * Handles the list that appears when you right-click on certain elements
+     * @param text The text to look for (basically, the action to take)
+     */
+    public void handleRightClickMenu(String text) {
+        List<WebElement> row = driver.findElements(By.tagName("div"));
+        for (WebElement el : row){
+            try {                
+                if (el.getText().equals(text)) {
+                    el.click();
+                }
+            } catch (Exception e){
+                System.out.println("Element doesn't have text!");
+            }
+        }
     }
     
 }
