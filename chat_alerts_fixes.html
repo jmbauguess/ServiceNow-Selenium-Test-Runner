@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<title>Chat - Alerts: Performance Fixes</title>
+	<link rel="stylesheet" type="text/css" href="http://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/css/bootstrap.min.css"/>
+</head>
+<body>
+	<div class="container">
+		<div class="row row-offcanvas row-offcanvas-right">
+	<h1>Chat - Alerts: Performance Fixes</h1>
+
+	<a href="https://share.servicenow.com/app.do#/detailV2/5227cfc687d211008bf84b0b0e434d95/overview" target="_blank">Click here to view the Chat - Alerts Application in ServiceNow Share</a>
+
+	<h2>DISCLAIMER:</h2>
+	<p class="lead">The following is a way to improve performance on the Chat - Alerts application, designed by Andrew Venables.  The original functionality and idea are his, and the following are modifications I made to help increase system performance on my instance.  The same modifications may not work perfectly for your instance, so please, don't take this as gospel, just helpful pointers.</p>
+
+	<h3>1. Create a role (or group) to isolate the chat polling.</h3>
+
+	<p>I called my "support_desk" and assigned it to my Support Desk.</p>
+
+	<h3>2. Edit the ChatAlertsClient UI Script to only work on that role/group.</h3>
+
+	<div class="highlight">
+		<pre>
+			<code class="language-js" data-lang="js">
+	start: function() {
+		if (g_user.hasRole('support_desk')){
+			var ga = new GlideAjax('ChatAlerts');
+			ga.addParam('sysparm_name','getMyMessages');
+			ga.getXML(this.response.bind(this));
+		}
+	}
+			</code>
+		</pre>
+	</div>
+
+	<p>This will isolate the getMyMessages calls to JUST the support_desk...and admins.  This way you won't have every single user (and every browser window they have open) calling getMyMessages every 30000 ms.</p>
+
+	<h3>3. Change up the <code>getMyMessages</code> function in the ChatAlerts script include.</h3>
+
+	<div class="highlight">
+		<pre>
+			<code class="language-js" data-lang="js">
+	getMyMessages: function() {
+		this.log('ChatAlerts.getMyMessages()');
+		if (gs.getUserID() == '')
+			return;
+		var result = this.newItem("result");
+		result.setAttribute("poll_interval", gs.getProperty('chat.alert.poll_interval', 30000));
+		var gr = new GlideRecord('chat_message');
+		gr.addQuery('state', 'active');
+		gr.addQuery('body', '!=', '');
+		gr.addQuery('u_acknowledged', false);
+		gr.orderBy('sys_created_on');
+		gr.query();
+		while (gr.next()) {
+			this.log("Found a record, " + gr.body);
+			var cc = new GlideRecord('chat_channel_member');
+			cc.addQuery('chat_channel', gr.chat_channel);
+			cc.query();
+			if (cc.getRowCount() == 2){
+				this._addChatMessage(gr);
+			}
+		}
+		result.setAttribute("message", "Returning message(s)");
+	},	
+			</code>
+		</pre>
+	</div>
+
+	<p>The rationale here is that only certain members of a chat queue/channel matter for receiving the alerts.  Let's say your Service Desk has the role (which is how ours is set up).  They're taking calls, reading emails, working with customers and have a few windows of ServiceNow up on their screen to look at various incidents/requests/changes/etc.  The only messages they need to be alerted to are those no one is currently helping.  Those messages are part of a chat channel with just two members: the user who's asking for assistance, and the queue itself.  Therefore, we only ever need to return those messages.</p>
+
+	<h3>4. Edit the (AV) Acknowledge previous messages business rule.</h3>
+
+	<div class="highlight">
+		<pre>
+			<code class="language-js" data-lang="js">
+	/**
+ 	* Acknowledge Support Desk member messages automatically
+ 	*/
+	var msg = new GlideRecord('chat_message');
+	msg.addQuery('u_acknowledged', false);
+	msg.query();
+	while (msg.next()){
+		var user = new GlideRecord('sys_user');
+		if (user.get(msg.from_id)){
+			var membership = new GlideRecord('sys_user_grmember');
+			membership.addQuery('user', user.sys_id);
+			membership.addQuery('group.name', 'Support Desk');
+			membership.query();
+			if (membership.next()){
+				msg.u_acknowledged = true;
+				msg.update();
+			}
+		}
+	}
+
+	/**
+	* Acknowledge Queue messages automatically
+	*/
+	var gr = new GlideRecord('chat_message');
+	gr.addQuery('from_table', 'chat_queue');
+	gr.addQuery('u_acknowledged', false);
+	gr.query();
+	while (gr.next()) {
+		gr.u_acknowledged = true;
+		gr.update();
+	}
+
+	/**
+ 	* Acknowledge old messages if from the same user
+ 	* First, get users from messages that have been acknowledged today
+ 	* Next, check for unacknowledged messages from that user
+ 	* Finally, acknowledge those messages
+ 	*/
+	var userArray = [];
+	var gr = new GlideRecord('chat_message');
+	gr.addQuery('from_table', 'sys_user');
+	gr.addEncodedQuery('sys_created_onRELATIVEGE@minute@ago@' + gs.getProperty('panicy.user.time', 1));
+	gr.addQuery('u_acknowledged', true);
+	gr.query();
+	while (gr.next()){
+		userArray.push(gr.from_id + '');
+	}
+	for (var i = 0; i < userArray.length; i++) {
+		var msg = new GlideRecord('chat_message');
+		msg.addQuery('from_id', userArray[i]);
+		msg.addQuery('u_acknowledged', false);
+		msg.query();
+		while (msg.next()){
+			msg.u_acknowledged = true;
+			msg.update();
+		}
+	}
+	/**
+ 	* Also acknowledge messages that are to a chat room that's NOT support desk
+ 	*/
+	var room = new GlideRecord('chat_room');
+	if (room.get(current.to_id)){
+		if (room.name.indexOf('Support Desk') == -1) {
+			current.u_acknowledged = true;
+			current.update();
+		}
+	}
+			</code>
+		</pre>
+	</div>
+
+	<p>Remember: remove the condition on the business rule, so it always fires on "after insert".  The first block is self-explanatory: the support desk doesn't need to see their own messages.  The second block is similar: they don't need to see the canned messages that the queue spits out to waiting users.  The third block is a clean-up function that checks to see if the user has already chatted today, and if so and the messages meet a certain creation time criteria, acknowledges messages.  (I left a provision for users who may end a chat, then nearly immediately restart a chat because they forgot something.)  The last block ensures that if users are chatting in a change request or other record that those messages will be acknowledged and never be hit in our script include query.</p>
+
+	<h3>5. Make the <code>u_acknowledged</code> field editable by admins.</h3>
+
+	<p>If all else fails, you can simply go back and acknowledge the messages manually.</p>
+</div>
+	<hr/>
+	<footer>
+		<p>Justin Bauguess - <a href='mailto:jmbauguess@gmail.com'>jmbauguess@gmail.com</a></p>
+		<p><a href="http://baugs.wordpress.com">Read My Blog</a></p>
+	</footer>
+</div>
+<script src="//maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
+</body>
+</html>
