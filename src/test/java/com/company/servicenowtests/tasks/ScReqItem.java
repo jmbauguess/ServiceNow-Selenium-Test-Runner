@@ -1,6 +1,8 @@
 package com.company.servicenowtests.tasks;
 
 import com.company.servicenowtests.BaseTest;
+import java.util.List;
+import java.util.Random;
 import org.openqa.selenium.By;
 import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
@@ -427,7 +429,7 @@ public class ScReqItem extends BaseTest {
     
     /**
      * For a given list collector, takes selected items from the left list and moves them into the right list
-     * @param listName A list collector
+     * @param listName A list collector name
      */
     public void handleListCollector(String listName) {
         if (driver instanceof JavascriptExecutor) {
@@ -440,7 +442,7 @@ public class ScReqItem extends BaseTest {
     
     /**
      * For a given list collector, takes selected items from the right list and moves them into the left list
-     * @param listName A list collector
+     * @param listName A list collector name
      */
     public void handleListCollectorRemove(String listName) {
         if (driver instanceof JavascriptExecutor) {
@@ -448,6 +450,32 @@ public class ScReqItem extends BaseTest {
                     executeScript("moveOptionAndSort(gel('" + listName + 
                             "_select_1'), gel('" + listName + 
                             "_select_0'), '--None--', ['home'], '--None--');");
+        }
+    }
+    
+    /**
+     * Clicks on random options in a given list collector
+     * @param listCollector A list collector element
+     * @param count How many items to select
+     */
+    public void selectRandomListCollectorOptions(WebElement listCollector, int count){
+        List<WebElement> options = listCollector.findElements(By.tagName("option"));
+        int previous = -1;
+        Random random = new Random();
+        //If the count is higher than the list size, reset the count to something randomly less than the size of the list
+        if (count > options.size()) {
+            count = options.size() - random.nextInt(options.size() - 1);
+        }
+        //If the count is 0, set it to 1 so at least something is clicked
+        if (count == 0) {
+            count = 1;
+        }
+        for (int i = 0; i < count; i++) {
+            int current = random.nextInt(options.size() - 1);
+            if (previous != current) {
+                options.get(current).click();
+                previous = current;
+            }
         }
     }
 
