@@ -2,6 +2,7 @@ package com.company.servicenowtests.tasks;
 
 import com.company.servicenowtests.BaseTest;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
@@ -422,6 +423,32 @@ public class ScReqItem extends BaseTest {
      */
     public String extractSysIDFromLink(){
         return driver.findElements(By.className("linked")).get(1).getAttribute("href").replace(getBASE_URL() + "sc_req_item.do?sys_id=", "");
+    }
+    
+    /**
+     * For a given list collector, takes selected items from the left list and moves them into the right list
+     * @param listName A list collector
+     */
+    public void handleListCollector(String listName) {
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).
+                    executeScript("moveOptionAndSort(gel('" + listName + 
+                            "_select_0'), gel('" + listName + 
+                            "_select_1'), '--None--', [], '--None--');");
+        }
+    }
+    
+    /**
+     * For a given list collector, takes selected items from the right list and moves them into the left list
+     * @param listName A list collector
+     */
+    public void handleListCollectorRemove(String listName) {
+        if (driver instanceof JavascriptExecutor) {
+            ((JavascriptExecutor) driver).
+                    executeScript("moveOptionAndSort(gel('" + listName + 
+                            "_select_1'), gel('" + listName + 
+                            "_select_0'), '--None--', ['home'], '--None--');");
+        }
     }
 
 }
