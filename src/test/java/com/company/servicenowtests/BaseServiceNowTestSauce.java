@@ -17,8 +17,8 @@ import org.junit.BeforeClass;
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.rules.TestName;
+import com.saucelabs.junit.ConcurrentParameterized;
 import org.junit.runner.RunWith;
-import org.junit.runners.Parameterized;
 import org.openqa.selenium.Platform;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.remote.CapabilityType;
@@ -33,8 +33,7 @@ import org.openqa.selenium.support.ui.WebDriverWait;
  * 
  * @author Justin Bauguess
  */
-@RunWith(Parallelized.class)
-@Ignore
+@RunWith(ConcurrentParameterized.class)
 public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
 
     public WebDriver driver;
@@ -83,10 +82,10 @@ public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
                         + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);      
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);        
-        baseTest = PageFactory.initElements(driver, BaseTest.class);                
+        baseTest = PageFactory.initElements(driver, BaseTest.class);           
     }
 
-    @Parameterized.Parameters
+    @ConcurrentParameterized.Parameters
     public static LinkedList browsersStrings() throws Exception {
         LinkedList browsers = new LinkedList();
         //browsers.add(new String[]{Platform.WIN8.toString(), "30", "firefox"});
