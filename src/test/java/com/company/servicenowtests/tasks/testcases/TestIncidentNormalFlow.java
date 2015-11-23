@@ -25,19 +25,8 @@ public class TestIncidentNormalFlow extends BaseServiceNowTestSauce implements S
         super(os, version, browser);
     }
 
-    @Before
-    public void setUp() throws Exception {
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
-        capabilities.setCapability(CapabilityType.VERSION, version);
-        capabilities.setCapability(CapabilityType.PLATFORM, os);
-        capabilities.setCapability("name", testName.getMethodName());
-        this.driver = new RemoteWebDriver(
-                new URL("http://" + authentication.getUsername() + ":" + authentication.getAccessKey()
-                        + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);      
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);        
-        sessionId=((RemoteWebDriver)driver).getSessionId();
+    @Override
+    public void pageSpecificSetup() {
         incident = PageFactory.initElements(driver, Incident.class);        
         incident.login(0);
     }

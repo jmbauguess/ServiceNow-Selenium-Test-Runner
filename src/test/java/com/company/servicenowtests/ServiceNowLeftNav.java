@@ -92,7 +92,7 @@ public class ServiceNowLeftNav extends BaseTest {
      * Gets a list of LeftNavFilters to check for Incident
      * @return LeftNavFilters for incident
      */
-    public List<LeftNavFilter> getSocialITFilters() {
+    public List<LeftNavFilter> getIncidentFilters() {
         List<LeftNavFilter> incidentFilter = new ArrayList();
         incidentFilter.add(new LeftNavFilter(IncidentOpen, "incident", "active=true"));
         incidentFilter.add(new LeftNavFilter(IncidentClosed, "incident", "active=false"));

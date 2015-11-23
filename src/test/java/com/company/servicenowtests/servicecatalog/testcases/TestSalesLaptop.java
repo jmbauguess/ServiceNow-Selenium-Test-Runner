@@ -26,18 +26,8 @@ public class TestSalesLaptop extends BaseServiceNowTestSauce {
         super(os, version, browser);
     }
     
-    @Before
-    public void setUp() throws Exception {
-        DesiredCapabilities capabilities = new DesiredCapabilities();
-        capabilities.setCapability(CapabilityType.BROWSER_NAME, browser);
-        capabilities.setCapability(CapabilityType.VERSION, version);
-        capabilities.setCapability(CapabilityType.PLATFORM, os);
-        capabilities.setCapability("name", testName.getMethodName());
-        this.driver = new RemoteWebDriver(
-                new URL("http://" + authentication.getUsername() + ":" + authentication.getAccessKey()
-                        + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);      
-        driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
-        driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS); 
+    @Override
+    public void pageSpecificSetup() {
         ritm = PageFactory.initElements(driver, SalesLaptop.class);
         ritm.login(0);
     }

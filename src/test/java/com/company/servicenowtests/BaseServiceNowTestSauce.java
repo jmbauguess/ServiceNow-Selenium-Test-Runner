@@ -83,8 +83,10 @@ public class BaseServiceNowTestSauce implements SauceOnDemandSessionIdProvider {
                         + "@ondemand.saucelabs.com:80/wd/hub"), capabilities);      
         driver.manage().timeouts().implicitlyWait(30, TimeUnit.SECONDS);
         driver.manage().timeouts().pageLoadTimeout(10, TimeUnit.SECONDS);        
-        baseTest = PageFactory.initElements(driver, BaseTest.class);                
+        pageSpecificSetup();           
     }
+    
+    public void pageSpecificSetup() {}
 
     @Parameterized.Parameters
     public static LinkedList browsersStrings() throws Exception {
