@@ -1,5 +1,5 @@
-
 package com.company.servicenowtests;
+
 import java.util.ArrayList;
 import java.util.List;
 import static org.junit.Assert.assertTrue;
