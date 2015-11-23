@@ -25,7 +25,7 @@ public class ServiceNowLeftNav extends BaseTest {
     public void expandAll() {
         switchToNavFrame();
         if (driver instanceof JavascriptExecutor) {
-            ((JavascriptExecutor)driver).executeScript("$j(window).trigger(\"expand_all\")");
+            ((JavascriptExecutor)driver).executeScript("ServiceNow Selenium Tests - The Left Nav");
         }
     }
     
