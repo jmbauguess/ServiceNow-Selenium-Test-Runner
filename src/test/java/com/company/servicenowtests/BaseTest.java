@@ -30,6 +30,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 public class BaseTest {
 
     protected WebDriver driver;
+    
+    @FindBy(id = "sys_uniqueValue")
+    public WebElement sysId;
 
     @FindBy(id = "user_name")
     public WebElement username;
