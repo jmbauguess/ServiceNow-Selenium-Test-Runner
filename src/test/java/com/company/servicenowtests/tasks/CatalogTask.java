@@ -11,7 +11,7 @@ import org.openqa.selenium.support.FindBy;
 
 /**
  *
- * @author 162107
+ * @author jbauguess
  */
 public class CatalogTask extends BaseTest {
     
